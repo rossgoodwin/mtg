@@ -15,6 +15,13 @@ def move(coords):
 	game_string = ' '.join(game)
 	put("position startpos moves " + game_string)
 
+def scorepersp(count, scoreint):
+	if bool(count % 2):
+		score = scoreint * -1
+	else:
+		score = scoreint
+	return score
+
 def analyze(m):
 	last_line = ""
 	move(m)
@@ -26,7 +33,7 @@ def analyze(m):
 			text = engine.stdout.readline().strip()
 			split_text = text.split(' ')
 			if len(split_text) > 6 and split_text[5] == 'score':
-				score = [split_text[6], abs(int(split_text[7]))]
+				score = [split_text[6], scorepersp(movecount, int(split_text[7]))]
 			if split_text[0] == 'bestmove':
 				return {'rightmove': split_text[1],
 						'ponder': split_text[3],
@@ -38,6 +45,7 @@ def analyze(m):
 
 
 game = []
+movecount = 1
 
 if __name__ == '__main__':
 	first_move = raw_input('> ')
@@ -45,3 +53,4 @@ if __name__ == '__main__':
 		analysis = analyze(first_move)
 		print analysis
 		first_move = analysis['movemade']
+		movecount += 1
