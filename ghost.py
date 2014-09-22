@@ -22,6 +22,9 @@ def scorepersp(scoreint):
 		score = scoreint
 	return score
 
+# TODO: ADD LINE IN CODE SO I CAN TAKE MOVES BACK
+# REVERSE OF PREVIOUS MOVE SHOULD = MOVEBACK()
+
 def analyze(m):
 	last_line = ""
 	move(m)
@@ -45,8 +48,11 @@ def analyze(m):
 
 
 game = []
+gamedata = []
 movecount = 1
 
+
+# TODO: ADD EASTER EGGS
 
 first_move = raw_input('> ')
 while True:
@@ -54,3 +60,8 @@ while True:
 	print analysis
 	first_move = analysis['movemade']
 	movecount += 1
+	gamedata.append(analysis)
+	if analysis['score'][0] != 'cp':
+		print "BOOM! PIECES FLY OFF THE BOARD!"
+		print gamedata
+		break
