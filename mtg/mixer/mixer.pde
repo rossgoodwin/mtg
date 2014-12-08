@@ -7,8 +7,8 @@ PrintWriter gameOutput;
 Serial myPort;
 boolean firstContact = false;
 String myString;
-float whiteVol = -40.0;
-float blackVol = -40.0;
+float whiteVol = 0.0;
+float blackVol = 0.0;
 int reset = 0;
 
 String curMove = "";
@@ -28,7 +28,7 @@ AudioPlayer player6;
 
 int score = 0;
 boolean[] status = new boolean[11];
-String[] tracks = {"n.mp3", "w1.mp3", "w2.mp3", "w3.mp3", "b1.mp3", "b2.mp3", "b3.mp3"};
+String[] tracks = {"n.mp3", "w1.wav", "w2.wav", "w3.wav", "b1.wav", "b2.wav", "b3.wav", "m1.wav", "m2.wav", "m3.wav", "m4.wav", "m5.wav", "parity.wav"};
 
 char[] files = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 char[] ranks = {'1', '2', '3', '4', '5', '6', '7', '8'};
@@ -57,7 +57,7 @@ void playTracks(int s, int t1, int t2, int t3, int t4, int t5, int t6) {
   player5 = minim5.loadFile(tracks[t5]);
   player6 = minim6.loadFile(tracks[t6]);
   player1.loop();
-  player2.loop();
+  player2.play();
   player3.loop();
   player4.loop();
   player5.loop();
@@ -75,47 +75,87 @@ void serialEvent(Serial myPort) {
   myString = myPort.readStringUntil('\n');
   if (myString != null) {
     myString = trim(myString);
-    if (firstContact == false) {
-      if (myString.equals("hello")) {
-        myPort.clear();
-        firstContact = true;
-        myPort.write('A');
-      }
-    }
-    else {
-      String sensors[] = split(myString, ',');
-      // for (int i=0; i<sensors.length; i++) {
-      //   print("Sensor " + i + ": " + sensors[i] + "\t");
-      // }
-      // println();
-      if (sensors.length == 3) {
-        whiteVol = map(int(sensors[0]), 1023, 0, -40.0, 6.0);
-        blackVol = map(int(sensors[1]), 1023, 0, -40.0, 6.0);
-        reset = int(sensors[2]);
-      }
-      else if (sensors.length == 4) {
-        if (!sensors[0].equals(curMove)) {
-          curMove = sensors[0];
-          gameOutput.println(curMove);
-          gameOutput.flush();
-          println(curMove);
-        }
-        whiteVol = map(int(sensors[1]), 1023, 0, -40.0, 6.0);
-        blackVol = map(int(sensors[2]), 1023, 0, -40.0, 6.0);
-        reset = int(sensors[3]);
-      }
-    }
-    myPort.write("A");
+    //String sensors[] = split(myString, ',');
+    //if (sensors.length == 3) {
+      
+      // whiteVol = map(int(sensors[0]), 1023, 0, -40.0, 6.0);
+      // //print(whiteVol+",");
+      // blackVol = map(int(sensors[1]), 1023, 0, -40.0, 6.0);
+      // //print(blackVol+",");
+      // reset = int(sensors[2]);
+      // //println(reset);
+      
+    //} else if (sensors.length == 2 && !sensors[0].startsWith("1") && !sensors[0].startsWith("0")) {
+
+    curMove = myString;
+    gameOutput.println(curMove);
+    gameOutput.flush();
+    println(curMove);
+
+    //}
+    
   }
+  
+  // if (myString != null) {
+  //   myString = trim(myString);
+  //   if (firstContact == false) {
+  //     if (myString.equals("hello")) {
+  //       myPort.clear();
+  //       firstContact = true;
+  //       myPort.write('A');
+  //     }
+  //   }
+  //   else {
+  //     String sensors[] = split(myString, ',');
+  //     // for (int i=0; i<sensors.length; i++) {
+  //     //   print("Sensor " + i + ": " + sensors[i] + "\t");
+  //     // }
+  //     // println();
+  //     if (sensors.length == 3) {
+        
+  //       boolean containsHello = false;
+        
+  //       for (int i=0; i<3; i++) {
+  //         if (sensors[i].startsWith("hello")) {
+  //           containsHello = true;
+  //         }
+  //       }
+        
+  //       if (!containsHello) {
+  //         whiteVol = map(int(sensors[0]), 1023, 0, -40.0, 6.0);
+  //         //print(whiteVol+",");
+  //         blackVol = map(int(sensors[1]), 1023, 0, -40.0, 6.0);
+  //         //print(blackVol+",");
+  //         reset = int(sensors[2]);
+  //         //println(reset);
+  //       }
+  //     }
+  //     else if (sensors.length == 2) {
+  //       if (!sensors[0].startsWith("hello")) {
+  //         curMove = sensors[0];
+  //         gameOutput.println(curMove);
+  //         gameOutput.flush();
+  //         println(curMove);
+  //       }
+  //       // whiteVol = map(int(sensors[1]), 1023, 0, -40.0, 6.0);
+  //       // blackVol = map(int(sensors[2]), 1023, 0, -40.0, 6.0);
+  //       // reset = int(sensors[3]);
+  //     }
+  //   }
+  // }
 }
 
-void setup() {
+void setup() {  
+  // String[] ghostdotpy = {"python", "/Users/rg/Projects/mtg/mtg/mtg/ghost.py"};
+  // exec(ghostdotpy);
+  
   size(displayWidth, displayHeight);
   
   gameOutput = createWriter("game.txt");
   
-  String portName = "/dev/cu.wchusbserial1420";
+  String portName = "/dev/cu.wchusbserial1410";
   myPort = new Serial(this, portName, 9600);
+  myPort.clear();
   myPort.bufferUntil('\n');
   
   minim1 = new Minim(this);
@@ -146,51 +186,56 @@ void draw() {
   if (scoreString.length >= 1) {
     score = int(scoreString[0]);
   }
+  
+  String mateString[] = loadStrings("checkmate.txt");
+  if (int(mateString[0]) == 1) {
+    myPort.write('x');
+  }
   //println(score);
   
   // status 0: score <= -450
   if (score <= -450 && status[0]) {
-    playTracks(0, 0, 0, 0, 4, 5, 6);
+    playTracks(0, 5, 11, 0, 0, 0, 0);
   }
   // status 1: -350 >= score > -450
   else if (score <= -350 && score > -450 && status[1]) {
-    playTracks(1, 0, 0, 0, 4, 5, 0);
+    playTracks(1, 4, 10, 0, 0, 0, 0);
   }
   // status 2: -250 >= score > -350
   else if (score <= -250 && score > -350 && status[2]) {
-    playTracks(2, 0, 0, 0, 4, 0, 0);
+    playTracks(2, 6, 9, 0, 0, 0, 0);
   }
   // status 3: -150 >= score > -250
   else if (score <= -150 && score > -250 && status[3]) {
-    playTracks(3, 1, 0, 0, 4, 5, 6);
+    playTracks(3, 5, 8, 0, 0, 0, 0);
   }
   // status 4: -50 >= score > -150
   else if (score <= -50 && score > -150 && status[4]) {
-    playTracks(4, 1, 0, 0, 4, 5, 0);
+    playTracks(4, 4, 7, 0, 0, 0, 0);
   }
   // status 5: -50 < score < 50
   else if (abs(score) < 50 && status[5]) {
-    playTracks(5, 1, 0, 0, 4, 0, 0); //<>//
+    playTracks(5, 12, 0, 0, 0, 0, 0); //<>//
   }
   // status 6: 50 <= score < 150
   else if (score >= 50 && score < 150 && status[6]) {
-    playTracks(6, 1, 2, 0, 4, 0, 0);
+    playTracks(6, 1, 7, 0, 0, 0, 0);
   }
   // status 7: 150 <= score < 250
   else if (score >= 150 && score < 250 && status[7]) {
-    playTracks(7, 1, 2, 3, 4, 0, 0);
+    playTracks(7, 2, 8, 0, 0, 0, 0);
   }
   // status 8: 250 <= score < 350
   else if (score >= 250 && score < 350 && status[8]) {
-    playTracks(8, 1, 0, 0, 0, 0, 0);
+    playTracks(8, 3, 9, 0, 0, 0, 0);
   }
   // status 9: 350 <= score < 450
   else if (score >= 350 && score < 450 && status[9]) {
-    playTracks(9, 1, 2, 0, 0, 0, 0);
+    playTracks(9, 2, 10, 0, 0, 0, 0);
   }
   // status 10: score >= 450
   else if (score >= 450 && status[10]) {
-    playTracks(10, 1, 2, 3, 0, 0, 0);
+    playTracks(10, 3, 11, 3, 0, 0, 0);
   }
   
   // set gain based on potentiometer input
@@ -239,7 +284,7 @@ void draw() {
   }
   
   // display curMove
-  if (!curMove.equals("")) {
+  if (!curMove.equals("") && !curMove.startsWith("1") && !curMove.startsWith("0")) {
     char originFile = curMove.charAt(0); 
     char originRank = curMove.charAt(1);
     char destFile = curMove.charAt(2);

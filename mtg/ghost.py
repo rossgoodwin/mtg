@@ -1,6 +1,8 @@
 from time import sleep
 import subprocess
 
+sysPath = "/Users/rg/Projects/mtg/mtg/mtg/"
+
 engine = subprocess.Popen(
 	'stockfish',
 	stdin=subprocess.PIPE,
@@ -9,24 +11,28 @@ engine = subprocess.Popen(
 
 # CLEAR EXISTING FILES
 
-score_file = open('mixer/data/score.txt', 'w')
+score_file = open(sysPath+'mixer/data/score.txt', 'w')
 score_file.write('0')
 score_file.close()
 
-game_file = open('mixer/game.txt', 'w')
+game_file = open(sysPath+'mixer/game.txt', 'w')
 game_file.write("")
 game_file.close()
 
-bestmove_file = open('mixer/data/bestmove.txt', 'w')
+bestmove_file = open(sysPath+'mixer/data/bestmove.txt', 'w')
 bestmove_file.write("")
 bestmove_file.close()
+
+checkmate_file = open(sysPath+'mixer/data/checkmate.txt', 'w')
+checkmate_file.write('0')
+checkmate_file.close()
 
 def put(command):
 	engine.stdin.write(command+'\n')
 
 def newmovecheck():
 	_game = []
-	g = open('mixer/game.txt', 'r')
+	g = open(sysPath+'mixer/game.txt', 'r')
 	for line in g:
 		line = line.split('\n')
 		_game.append(line[0])
@@ -38,7 +44,7 @@ def newmovecheck():
 
 def gameupdate():
 	_game = []
-	g = open('mixer/game.txt', 'r')
+	g = open(sysPath+'mixer/game.txt', 'r')
 	for line in g:
 		line = line.split('\n')
 		_game.append(line[0])
@@ -96,14 +102,17 @@ while True:
 		print analysis
 
 		if analysis['score'][0] != 'cp':
+			cm = open(sysPath+'mixer/data/checkmate.txt', 'w')
+			cm.write('1')
+			cm.close()
 			print "BOOM! PIECES FLY OFF THE BOARD!"
 			break
 
-		f = open('mixer/data/score.txt', 'w')
+		f = open(sysPath+'mixer/data/score.txt', 'w')
 		f.write(str(analysis['score'][1]))
 		f.close()
 
-		e = open('mixer/data/bestmove.txt', 'w')
+		e = open(sysPath+'mixer/data/bestmove.txt', 'w')
 		e.write(analysis['rightmove'])
 		e.close()
 
